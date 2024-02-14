@@ -31,7 +31,8 @@ public class AuthenticConfig{
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
 //        /api로 시작하는 path들만 인증 갖게 한다.
-        return (web) -> web.ignoring().requestMatchers("^(?!/api/).*");
+        return (web) -> web.ignoring().requestMatchers("^(?!/api/).*")
+                .requestMatchers("/api/*/users/join", "/api/*/users/login");
     }
 
 
@@ -40,7 +41,6 @@ public class AuthenticConfig{
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> auth
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .requestMatchers("/api/*/users/join", "/api/*/users/login").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
                 .sessionManagement((s) -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

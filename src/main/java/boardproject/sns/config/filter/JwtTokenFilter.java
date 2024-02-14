@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,23 +25,31 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 
     private final UserService userService;
+    private final static List<String> TokenInParamUrl = List.of("/api/v1/users/alarm/subscribe");
 
     @Override //request가 들어오면 인증 수행할수 있는 작업
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        final String token;
         //헤더
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if(header == null || !header.startsWith("Bearer ")){
-            log.error("헤더 가져오는 도중 에러발생");
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try{
+            if(TokenInParamUrl.contains(request.getRequestURI())){
+//                Sse는 헤더지원이 안되기 때문에 리퀘스트 파람에서 꺼낸다.
+//                alarm/subscribe의 파람안에 토큰이 있다면 값을 꺼내어 필터 실시
+                token = request.getQueryString().split("=")[1].trim();
+                log.info("request {} check query param", request.getRequestURI());
+            }else{
+                final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        try {
-//            베어럴은 스페이스로 구분되있고, 첫번째에 토큰값이 들어있다.
-            final String token = header.split(" ")[1].trim();
+                if(header == null || !header.startsWith("Bearer ")){
+                    log.error("헤더 가져오는 도중 에러발생");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                token = header.split(" ")[1].trim();
 
+            }
 
 //            토큰 체크
             String key = "testSecretKey20230327testSecretKey20230327testSecretKey2023032";
