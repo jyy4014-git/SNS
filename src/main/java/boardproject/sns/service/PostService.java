@@ -7,6 +7,8 @@ import boardproject.sns.exception.SnsException;
 import boardproject.sns.model.AlarmType;
 import boardproject.sns.model.Comment;
 import boardproject.sns.model.Post;
+import boardproject.sns.model.event.AlarmEvent;
+import boardproject.sns.producer.AlarmProducer;
 import boardproject.sns.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
-    private final AlarmRepository alarmRepository;
+    private final AlarmProducer alarmProducer;
 
 
     @Transactional
@@ -61,6 +63,7 @@ public class PostService {
 
 
 
+    @Transactional
     public void delete(String userName, Integer postId){
         UserEntity userEntity = getUserEntityorException(userName);
 
@@ -70,6 +73,8 @@ public class PostService {
             throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("user %s has no permission with post %d", userName, postId));
         }
         postRepository.delete(postEntity);
+        likeRepository.deleteAllByPost(postEntity);
+        commentRepository.deleteAllByPost(postEntity);
     }
 
     public Page<Post> list(Pageable pageable){
@@ -88,7 +93,6 @@ public class PostService {
     public void like(Integer postId, String userName){
 
         PostEntity postEntity = getPostEntityOrException(postId);
-
         UserEntity userEntity = getUserEntityorException(userName);
 
 //        유저가 like 한번만 누르게 체크하는 로직
@@ -97,12 +101,14 @@ public class PostService {
         });
 
         likeRepository.save(LikeEntity.of(userEntity, postEntity));
-        alarmRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
+
+        alarmProducer.send(new AlarmEvent(postEntity.getUser().getId(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
-    public int likeCount(Integer postId){
+    public long likeCount(Integer postId){
 
         PostEntity postEntity = getPostEntityOrException(postId);
+
 
         return likeRepository.countByPost(postEntity);
 
@@ -116,7 +122,7 @@ public class PostService {
 //        댓글저장
         commentRepository.save(CommentEntity.of(userEntity, postEntity, comment));
 //        포스트 유저 작성자에게, NEW_COMMENT_ON_POST알람이 간다. 로그인한 유저 정보와 target id가 들어간다
-        alarmRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
+        alarmProducer.send(new AlarmEvent(postEntity.getUser().getId(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
 
     }
 
