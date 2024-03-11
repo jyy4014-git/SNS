@@ -59,14 +59,22 @@
 ![image](https://github.com/jyy4014-git/SNS/assets/134044918/aa7a3ef2-089a-4555-9e2f-bb18a20ce16f)
 
 <br><br>
-### 좋아요 기능
-![image](https://github.com/jyy4014-git/SNS/assets/134044918/8d581a37-e722-4142-8d84-662b2f6b0344)
+### 좋아요 및 알람 기능
+![image](https://github.com/jyy4014-git/SNS/assets/134044918/8162ed9c-6ee1-4872-9621-651cef35a651)
 <br><br>
-### 댓글 기능
-![image](https://github.com/jyy4014-git/SNS/assets/134044918/958d146e-15ac-4f77-b25d-8edaf323a9e4)
+### 댓글 및 알람 기능
+![image](https://github.com/jyy4014-git/SNS/assets/134044918/0284b6c6-7c02-405f-ac64-cae9a727a48e)
+
 <br><br>
 ### 알림 기능
 ![image](https://github.com/jyy4014-git/SNS/assets/134044918/28469da0-dc89-4e43-a41b-4c62399ed1a0)
+
+
+
+
+
+
+
 
 <br><br>
 ## 📎 기술 스택
